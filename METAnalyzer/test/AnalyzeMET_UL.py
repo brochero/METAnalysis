@@ -77,7 +77,8 @@ if not options.inputFiles:
     if not options.isData:
         if "2018" in options.dataEra:
             options.inputFiles = [
-                "root://xrootd-cms.infn.it///store/mc/RunIISummer20UL18MiniAODv2/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/130000/EE73AECB-35A7-6044-B82D-9DAE4E8DD693.root"
+                #"root://xrootd-cms.infn.it///store/mc/RunIISummer20UL18MiniAODv2/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/130000/EE73AECB-35A7-6044-B82D-9DAE4E8DD693.root"
+                "file:/gpfs/users/brochero/brochero_WorkArea/MET/CMSSW_12_0_0/src/METAnalysis/METAnalyzer/input/ttbar2018MiniAOD_006455CD-9CDB-B843-B50D-5721C39F30CE.root"
             ]
         elif "2017" in options.dataEra:
             options.inputFiles = [
@@ -160,7 +161,7 @@ process.load("METAnalysis.METAnalyzer.ObjectDefinitions_cfi")
 
 ####################### Event selection #############################
 
-process.load("METAnalysis.METAnalyzer.EventSelection_cfi")
+# process.load("METAnalysis.METAnalyzer.EventSelection_cfi")
 
 ####################### MET stuff #############################
 
@@ -181,8 +182,8 @@ runMetCorAndUncFromMiniAOD(
         "minEtaThreshold": 2.65,
         "maxEtaThreshold": 3.139,
     },
-    campaign="UL",
-    era=options.dataEra,
+    # campaign="UL",
+    # era=options.dataEra,
     postfix="PF",
 )
 
@@ -192,24 +193,24 @@ runMetCorAndUncFromMiniAOD(
     metType="Puppi",
     postfix="Puppi",
     jetFlavor="AK4PFPuppi",
-    campaign="UL",
-    era=options.dataEra,
+    # campaign="UL",
+    # era=options.dataEra,
 )
 
 process.puppiNoLep.useExistingWeights = True
 process.puppi.useExistingWeights = True
 
 ####################### MET filters ##########################
-process.load("MonoTop.METFilter.METFilter_cfi")
-if options.isData:
-    process.METFilter.filterData = cms.InputTag("TriggerResults","","RECO")
+# process.load("MonoTop.METFilter.METFilter_cfi")
+# if options.isData:
+#     process.METFilter.filterData = cms.InputTag("TriggerResults","","RECO")
 
-if "2018" in options.dataEra or "2017" in options.dataEra:
-    process.METFilter.filterNames += ["Flag_ecalBadCalibFilter"]
+# if "2018" in options.dataEra or "2017" in options.dataEra:
+#     process.METFilter.filterNames += ["Flag_ecalBadCalibFilter"]
 #print process.METFilter.filterNames
 
 ####################### HLT triggers ##########################
-process.load("MonoTop.METFilter.TriggerFilter_cfi")
+#process.load("MonoTop.METFilter.TriggerFilter_cfi")
 
 ####################### configure process #############################
 
@@ -261,20 +262,27 @@ process.content = cms.EDAnalyzer("EventContentAnalyzer")
 
 # met filters
 process.met = cms.Path()
-process.met *= process.METFilter
+#process.met *= process.METFilter
 #process.met *= process.HLTFilter
-process.met *= process.TriggerFilter
-process.met *= process.countLoosePatPhotons
-process.met *= process.countLoosePatMuons
-process.met *= process.countTightPatMuons
-process.met *= process.countLoosePatElectrons
-process.met *= process.countTightPatElectrons
+#process.met *= process.TriggerFilter
+#process.met *= process.countLoosePatPhotons
+#process.met *= process.countLoosePatMuons
+#process.met *= process.countTightPatMuons
+#process.met *= process.countLoosePatElectrons
+#process.met *= process.countTightPatElectrons
+# -- BEGIN From Javier 02/11/2022 
+process.met *= process.loosePatMuons
+process.met *= process.tightPatMuons
+process.met *= process.loosePatElectrons
+process.met *= process.tightPatElectrons
+process.met *= process.loosePatPhotons
+# -- END
 process.met *= process.METAnalyzer
 
 # muon task
-process.muons = cms.Task()
-process.muons.add(process.tightPatMuons)
-process.muons.add(process.loosePatMuons)
+# process.muons = cms.Task()
+# process.muons.add(process.tightPatMuons)
+# process.muons.add(process.loosePatMuons)
 
 # electron task
 process.electrons = cms.Task()
@@ -291,7 +299,7 @@ process.photons.add(process.tightPatPhotons)
 
 # associate the patAlgosToolsTask to the Endpath for unscheduled mode
 process.met.associate(process.patAlgosToolsTask)
-process.met.associate(process.muons)
+#process.met.associate(process.muons)
 process.met.associate(process.electrons)
 process.met.associate(process.photons)
 #print(process.dumpPython())
